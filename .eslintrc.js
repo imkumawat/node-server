@@ -26,12 +26,15 @@ module.exports = {
     ],
     'import/no-dynamic-require': 0,
     'global-require': 0,
+    'func-names': 'off',
     'import/prefer-default-export': 0,
     'no-underscore-dangle': 0,
-    'no-await-in-loop': 0,
+    'no-await-in-loop': 1,
     'no-restricted-syntax': 0,
     'no-return-await': 0,
-    'no-console': 0,
+    'consistent-return': 'off',
+    'no-console': 1,
+    'no-unused-vars': 1,
     'prettier/prettier': [
       'error',
       {
