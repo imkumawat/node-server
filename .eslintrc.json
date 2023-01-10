@@ -2,7 +2,8 @@
     "env": {
         "browser": true,
         "commonjs": true,
-        "es2021": true
+        "es2021": true,
+        "node": true
     },
     "extends": ["airbnb-base","prettier"],
     "overrides": [
@@ -11,7 +12,9 @@
         "ecmaVersion": "latest"
     },
     "rules": {
-        "no-console": 0,
-        "no-unused-vars": 2
+        "no-console": 2,
+        "no-unused-vars": 2,
+        "no-await-in-loop": 2,
+        "no-return-await": 2
     }
 }
