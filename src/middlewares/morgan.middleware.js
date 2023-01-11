@@ -2,7 +2,7 @@ const morgan = require("morgan");
 const { logger } = require("../utils/logger");
 
 // Passing error message received from error middlware if any error occurs
-morgan.token("message", (req, res) => res.locals.errorMessage || "");
+morgan.token("message", (req, res) => res.locals.errorMessage || " ");
 
 // Finalizing the request source ip address
 const getIpFormat = () =>
