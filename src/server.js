@@ -1,6 +1,7 @@
 // importing required npm packages
 const http = require("http");
 const express = require("express");
+const cors = require("cors");
 const session = require("express-session");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
@@ -22,6 +23,15 @@ const app = express();
  * Integrating middlwares
  */
 
+// Setting origin controls, allowed methods and prohibate requests from unknown origin
+// Set methods PUT DELETE to tell preflight requests whether method is allowed or not
+app.use(
+  cors({
+    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS : "*",
+    methods: process.env.ALLOWED_METHODS ? process.env.ALLOWED_METHODS : "*",
+  })
+);
+
 // Prevent the client-side script from accessing the protected cookie
 // Configure this as per the requirement
 app.use(
@@ -39,18 +49,15 @@ app.use(
   })
 );
 
-app.get("/", (req, res) => {
-  res.status(200).send("Ok, we are testing cookies");
-});
+// Adding the morgan middleware, should come before any routes
+app.use(successfulHttpLog);
+app.use(unsuccessfulHttpLog);
 
 // Adding body parser to enable json body format
 // Set the body limit as per the possible request size in your app to avoid buffer overflow attack
+// should come before any routes
 app.use(bodyParser.json({ limit: "2mb" }));
 app.use(bodyParser.urlencoded({ extended: true, limit: "2mb" }));
-
-// Adding the morgan middleware
-app.use(successfulHttpLog);
-app.use(unsuccessfulHttpLog);
 
 // Using helmet middleware to set security headers
 app.use(helmet());
@@ -69,7 +76,7 @@ app.use(mongoSanitize());
  */
 
 // Adding health check route
-app.get("/", serverHealthCheck);
+app.use("/", serverHealthCheck);
 
 /**
  * Initializing server
