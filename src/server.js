@@ -15,7 +15,9 @@ const {
 } = require("./middlewares/morgan.middleware");
 const { logger } = require("./utils/logger");
 const { rateLimiter } = require("./middlewares/rateLimiter.middleware");
-const { globalErrorHandler } = require("./middlewares/errorHandler.middleware");
+const {
+  globalErrorHandler,
+} = require("./middlewares/globalErrorHandler.middleware");
 const { serverHealthCheck } = require("./routes/serverHealth.route");
 
 // Creating express app instance
