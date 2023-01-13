@@ -10,6 +10,7 @@ exports.serverHealthCheck = router.get("/", (req, res) => {
       uptime: process.uptime(),
       timestamp: Date.now(),
     };
+
     res.status(200).send(healthcheck);
   } catch (err) {
     res.status(503).send(err.message);

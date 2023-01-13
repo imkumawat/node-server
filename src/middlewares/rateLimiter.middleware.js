@@ -2,11 +2,12 @@
  Note this rateLimiter is only for single node application.
  For multiple backend nodes or distributed environment use Redis, Memcached, MongoDB, MySQL, or PostgreSQL
  adapter to store rateLimiter data. Persistent storage is required for distributed system.
- Setting up a rate limiter for public API is crucial to protect it from DDOS, unexpected costs, or usage abuse.
+ Setting up a rate limiter for API is crucial to protect it from DDOS, unexpected costs, or usage abuse.
  
 */
 const httpStatus = require("http-status");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
+const { TOO_MANY_REQUESTS } = require("../constants/errorMessages");
 const { logger } = require("../utils/logger");
 
 // Configuring rate limiting. Allow at most 1 request per IP address for every 60 sec.
@@ -67,7 +68,7 @@ exports.rateLimiter = (req, res, next) => {
         logger.warn("Rejecting request due to rate limiting");
         res
           .status(httpStatus.TOO_MANY_REQUESTS)
-          .send("<h2>Too Many Requests</h2>");
+          .send(`<h2>${TOO_MANY_REQUESTS}</h2>`);
       });
   } else {
     // Allow request for non-specific or public routes.

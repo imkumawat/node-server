@@ -8,13 +8,14 @@ const hpp = require("hpp");
 const mongoSanitize = require("express-mongo-sanitize");
 const compression = require("compression");
 
-// importing custom packages
+// importing custom packages and middlewares
 const {
   successfulHttpLog,
   unsuccessfulHttpLog,
 } = require("./middlewares/morgan.middleware");
 const { logger } = require("./utils/logger");
 const { rateLimiter } = require("./middlewares/rateLimiter.middleware");
+const { globalErrorHandler } = require("./middlewares/errorHandler.middleware");
 const { serverHealthCheck } = require("./routes/serverHealth.route");
 
 // Creating express app instance
@@ -69,6 +70,9 @@ app.use(compression());
 
 // Adding health check route
 app.use(serverHealthCheck);
+
+// Adding global error handler middleware, Must be after all routes and before server intialization
+app.use(globalErrorHandler);
 
 /**
  * Initializing server
