@@ -2,11 +2,11 @@
 const http = require("http");
 const express = require("express");
 const cors = require("cors");
-const session = require("express-session");
 const bodyParser = require("body-parser");
 const helmet = require("helmet");
 const hpp = require("hpp");
 const mongoSanitize = require("express-mongo-sanitize");
+const compression = require("compression");
 
 // importing custom packages
 const {
@@ -14,17 +14,19 @@ const {
   unsuccessfulHttpLog,
 } = require("./middlewares/morgan.middleware");
 const { logger } = require("./utils/logger");
+const { rateLimiter } = require("./middlewares/rateLimiter.middleware");
 const { serverHealthCheck } = require("./routes/serverHealth.route");
 
-// Creating express instance
+// Creating express app instance
 const app = express();
 
 /**
- * Integrating middlwares
+ * Integrating global middlwares
  */
 
 // Setting origin controls, allowed methods and prohibate requests from unknown origin
-// Set methods PUT DELETE to tell preflight requests whether method is allowed or not
+// Set methods PUT DELETE PATCH to tell preflight requests whether method is allowed or not
+// Do not add methods GET POST as preflight requests will not come for them.
 app.use(
   cors({
     origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS : "*",
@@ -32,28 +34,15 @@ app.use(
   })
 );
 
-// Prevent the client-side script from accessing the protected cookie
-// Configure this as per the requirement
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "abcxyz",
-    resave: false,
-    saveUninitialized: false,
-    cookie: {
-      httpOnly: true,
-      secure: true,
-      domain: "example.com",
-      path: "foo/bar",
-      maxAge: 1000 * 60 * 60 * 24,
-    },
-  })
-);
-
-// Adding the morgan middleware, should come before any routes
+// Adding the morgan http requestt logger middleware, should come before any routes
 app.use(successfulHttpLog);
 app.use(unsuccessfulHttpLog);
 
-// Adding body parser to enable json body format
+// Adding api rate limiter, use only for production environment
+// eslint-disable-next-line
+const _ = process.env.NODE_ENV === "production" ? app.use(rateLimiter) : null;
+
+// Adding body parser to enable json body format & parsing
 // Set the body limit as per the possible request size in your app to avoid buffer overflow attack
 // should come before any routes
 app.use(bodyParser.json({ limit: "2mb" }));
@@ -71,12 +60,15 @@ app.use(hpp());
 // Remove all keys containing prohibited characters
 app.use(mongoSanitize());
 
+// compress request responses
+app.use(compression());
+
 /**
  * Defininig routes
  */
 
 // Adding health check route
-app.use("/", serverHealthCheck);
+app.use(serverHealthCheck);
 
 /**
  * Initializing server
