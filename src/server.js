@@ -7,7 +7,9 @@ process.on("SIGQUIT", require("./utils/signalHandler"));
 // if uncaught exception occurs than our entire node process will be in uncleaned state
 // and we have to terminate the entire application immediately
 // if uncaught exception occurs in any middlware than express will call the global
-// error handler middlware
+// error handler middlware.
+// Note: Express will not handle the all uncaught exceptions, thus they will be
+// handled by this uncaughtException handler like syntax error etc...
 // This must be defined before executing any application code or on the top
 process.on("uncaughtException", require("./utils/exitHandler"));
 
@@ -35,10 +37,20 @@ const {
 } = require("./middlewares/globalErrorHandler.middleware");
 const { serverHealthCheck } = require("./routes/serverHealth.route");
 const { ApiError } = require("./utils/ApiError");
+const routes = require("./routes/v1");
+const {
+  sentryIntializer,
+  sentryRequestHandler,
+  sentryTracingHandler,
+} = require("./utils/sentry");
 
 // Creating express app instance
 const app = express();
 
+// Initiazing sentry setup to monitor the server
+sentryIntializer(app);
+app.use(sentryRequestHandler);
+app.use(sentryTracingHandler);
 /**
  * Integrating global middlwares
  */
@@ -86,8 +98,10 @@ app.use(compression());
  * Defininig routes
  */
 
-// Adding health check route
+// Adding server health check route
 app.use(serverHealthCheck);
+
+app.use("/v1", routes);
 
 // Hnadling unknown routes on this server
 app.use((req, res, next) => next(new ApiError(404, `Not found`)));
@@ -125,10 +139,9 @@ mongoose
   });
 
 // Handling unhandled promise rejections in entire application
+// usually they occurs by bad network problem
 process.on("unhandledRejection", (err) => {
   logger.error(err);
-
-  // Add the error monitor service or sentry to log error
 
   // do not use process.exit(0) directly, this will abort all the running processes
   // and terminate the application

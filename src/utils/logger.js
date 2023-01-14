@@ -10,16 +10,6 @@ const levels = {
   debug: 4,
 };
 
-// This method set the current severity based on
-// the current NODE_ENV: show all the log levels
-// if the server was run in development mode; otherwise,
-// if it was run in production, show only warn and error messages.
-const level = () => {
-  const env = process.env.NODE_ENV || "development";
-  const isDevelopment = env === "development";
-  return isDevelopment ? "debug" : "info";
-};
-
 // Define different colors for each level.
 // Colors make the log message more visible,
 // adding the ability to focus or ignore messages.
@@ -48,7 +38,7 @@ const format = winston.format.combine(
   // Add the message timestamp with the preferred format
   winston.format.timestamp({ format: "DD-MM-YYYY HH:mm:ss:ms" }),
   // Tell Winston that the logs must be colored
-  winston.format.colorize({ all: true }),
+  winston.format.colorize({ all: process.env.NODE_ENV === "development" }),
   // Define the format of the message showing the timestamp, the level and the message
   winston.format.printf(
     (info) => `${info.timestamp} ${info.level}: ${info.message}`
@@ -74,7 +64,7 @@ const transports = [
 // Create the logger instance that has to be exported
 // and used to log messages.
 exports.logger = winston.createLogger({
-  level: level(),
+  level: process.env.NODE_ENV === "development" ? "debug" : "info",
   levels,
   format,
   transports,

@@ -12,10 +12,8 @@ exports.serverHealthCheck = router.get("/", (req, res, next) => {
       server_time: new Date().toISOString(),
       node_version: process.version,
     };
-
     res.status(200).send(serverHealth);
   } catch (err) {
     next(err);
-    // res.status(503).send(err.message);
   }
 });
