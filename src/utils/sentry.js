@@ -7,17 +7,21 @@ const tracing = require("@sentry/tracing");
 // for development environment
 
 exports.sentryIntializer = (expressInstance) => {
-  sentry.init({
-    environment: process.env.NODE_ENV,
-    dsn: process.env.SENTRY_DSN,
-    integrations: [
-      new sentry.Integrations.Http({ tracing: true }),
-      new tracing.Integrations.Express({ expressInstance }),
-    ],
-    tracesSampleRate: 1.0,
-    attachStacktrace: true,
-  });
-  return Promise.resolve("Intialized Sentry");
+  try {
+    sentry.init({
+      environment: process.env.NODE_ENV,
+      dsn: process.env.SENTRY_DSN,
+      integrations: [
+        new sentry.Integrations.Http({ tracing: true }),
+        new tracing.Integrations.Express({ expressInstance }),
+      ],
+      tracesSampleRate: 1.0,
+      attachStacktrace: true,
+    });
+    return Promise.resolve("Intialized Sentry");
+  } catch (err) {
+    return Promise.reject(err);
+  }
 };
 
 exports.sentryRequestHandler = sentry.Handlers.requestHandler();
