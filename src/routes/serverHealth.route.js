@@ -1,19 +1,25 @@
 const app = require("express");
+const mongoose = require("mongoose");
 
 const router = app.Router();
 
-exports.serverHealthCheck = router.get("/", (req, res, next) => {
+exports.serverHealthCheck = router.get("/", (req, res) => {
+  // Collecting system info
+  const serverHealth = {
+    server_status: "Active",
+    server_health: "Okay",
+    server_uptime: process.uptime(),
+    server_time: new Date().toISOString(),
+    node_version: process.version,
+    db_connection: mongoose.STATES[mongoose.connection.readyState],
+  };
   try {
-    // Optional: Add further things to check (e.g. connection to dababase, redis cluster etc...)
-    const serverHealth = {
-      server_status: "Active",
-      server_health: "Okay",
-      server_uptime: process.uptime(),
-      server_time: new Date().toISOString(),
-      node_version: process.version,
-    };
+    if (mongoose.connection.readyState !== 1) {
+      throw new Error();
+    }
     res.status(200).send(serverHealth);
   } catch (err) {
-    next(err);
+    res.status(503).send(serverHealth);
+    // next(err);
   }
 });

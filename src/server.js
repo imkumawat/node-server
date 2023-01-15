@@ -37,6 +37,7 @@ const {
 } = require("./middlewares/globalErrorHandler.middleware");
 const { serverHealthCheck } = require("./routes/serverHealth.route");
 const { ApiError } = require("./utils/ApiError");
+const { secretsInjector } = require("./utils/secretsInjector");
 // const routes = require("./routes/v1");
 const {
   sentryIntializer,
@@ -47,16 +48,6 @@ const {
 // Creating express app instance
 const app = express();
 
-// Initiazing sentry setup to monitor the server
-sentryIntializer(app)
-  .then((status) => {
-    logger.info(status);
-  })
-  .catch((err) => {
-    logger.error(err);
-  });
-app.use(sentryRequestHandler);
-app.use(sentryTracingHandler);
 /**
  * Integrating global middlwares
  */
@@ -126,26 +117,80 @@ const server = http.createServer(app);
 
 /**
  * Fetch secrets and inject secrets into the process environment that need on the time
- * of api call or required by other service
+ * of api call or required by other service like db connection sentry etc...
  * Establish database connection
  * Bind the port number to server intance to listen incomming requests
  */
 
-// Establishing connection to the database
-const DB_STRING = "";
-mongoose.set("strictQuery", false);
-mongoose
-  .connect(DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true })
-  .then(() => {
-    logger.info("Connected to database");
+// Injecting secrets into the process
+secretsInjector()
+  .then((Injectorstatus) => {
+    logger.info(Injectorstatus);
 
-    // Fetching secrets and injecting them into process environment
+    return new Promise((resolve, reject) => {
+      // Initiazing sentry setup to monitor the server
+      sentryIntializer(app)
+        .then((Sentrystatus) => {
+          app.use(sentryRequestHandler);
+          app.use(sentryTracingHandler);
+          resolve(Sentrystatus);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  })
+  .then((Sentrystatus) => {
+    logger.info(Sentrystatus);
+
+    // Establishing database connection
+    const DB_STRING = "";
+    mongoose.set("strictQuery", false);
+
+    return new Promise((resolve, reject) => {
+      mongoose
+        .connect(DB_STRING, {
+          useUnifiedTopology: true,
+          useNewUrlParser: true,
+        })
+        .then(() => {
+          resolve("Connected to database");
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  })
+  .then((databaseStatus) => {
+    logger.info(databaseStatus);
 
     // Everything is ready, let's take server up
     server.listen(process.env.SERVER_PORT || 4000, () => {
       logger.info("Listening on port 4000");
     });
+  })
+  .catch((err) => {
+    logger.error(err);
+    logger.info("Server closed due to unexpected error");
+    process.exit(0);
   });
+
+// Establishing connection to the database
+// const DB_STRING =
+//   "mongodb+srv://imkumawat:TRS3epLt3CNX5ZK5@development.7oo63ay.mongodb.net/?retryWrites=true&w=majority";
+// mongoose.set("strictQuery", false);
+// mongoose
+//   .connect(DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true })
+//   .then(() => {
+//     logger.info("Connected to database");
+
+//     // Fetching secrets and injecting them into process environment
+
+//     // Everything is ready, let's take server up
+//     server.listen(process.env.SERVER_PORT || 4000, () => {
+//       logger.info("Listening on port 4000");
+//     });
+//   });
 
 // Handling unhandled promise rejections in entire application
 // usually they occurs by bad network problem

@@ -4,6 +4,10 @@
 // otherwise it will be caught in catch
 // this code of peice give rid of writing try catch multiple times
 
+/**
+ *
+ * @param {async function} fn
+ */
 exports.catchAsync = (fn) => (req, res, next) => {
   Promise.resolve(fn(req, res, next)).catch(next);
 };
