@@ -1,3 +1,4 @@
+const config = require("config");
 const {
   SecretsManagerClient,
   GetSecretValueCommand,
@@ -5,10 +6,10 @@ const {
 
 const client = new SecretsManagerClient({
   credentials: {
-    accessKeyId: "",
-    secretAccessKey: "",
+    accessKeyId: config.AWS_ACCESS_KEY_ID,
+    secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
   },
-  region: process.env.REGION ? process.env.REGION : "us-east-1",
+  region: config.REGION ? config.REGION : "us-east-1",
 });
 
 exports.getSecret = async (secretName) => {
