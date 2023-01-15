@@ -17,6 +17,7 @@ exports.sentryIntializer = (expressInstance) => {
     tracesSampleRate: 1.0,
     attachStacktrace: true,
   });
+  return Promise.resolve("Intialized Sentry");
 };
 
 exports.sentryRequestHandler = sentry.Handlers.requestHandler();
@@ -27,7 +28,7 @@ exports.sentryTracingHandler = sentry.Handlers.tracingHandler();
 
 /**
  * Note Sentry will always capture database erros or  ApiError with status 500
- * in default mode below code is implementation
+ * in default mode(used as global middleware) below code is implementation
  * Adding Sentry Error Handler, must be before any error handler
  * app.use(sentryErrorHandler);
  */

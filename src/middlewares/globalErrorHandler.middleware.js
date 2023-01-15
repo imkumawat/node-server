@@ -62,7 +62,6 @@ exports.globalErrorHandler = (err, req, res, next) => {
   // if env is development then we will send error stack
   // this will help developers to identify error
 
-  // console.log(stack);
   res.status(statusCode).json({
     status: "fail",
     message,

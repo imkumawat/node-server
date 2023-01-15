@@ -37,7 +37,7 @@ const {
 } = require("./middlewares/globalErrorHandler.middleware");
 const { serverHealthCheck } = require("./routes/serverHealth.route");
 const { ApiError } = require("./utils/ApiError");
-const routes = require("./routes/v1");
+// const routes = require("./routes/v1");
 const {
   sentryIntializer,
   sentryRequestHandler,
@@ -48,7 +48,13 @@ const {
 const app = express();
 
 // Initiazing sentry setup to monitor the server
-sentryIntializer(app);
+sentryIntializer(app)
+  .then((status) => {
+    logger.info(status);
+  })
+  .catch((err) => {
+    logger.error(err);
+  });
 app.use(sentryRequestHandler);
 app.use(sentryTracingHandler);
 /**
@@ -56,12 +62,14 @@ app.use(sentryTracingHandler);
  */
 
 // Setting origin controls, allowed methods and prohibate requests from unknown origin
-// Set methods PUT DELETE PATCH to tell preflight requests whether method is allowed or not
-// Do not add methods GET POST as preflight requests will not come for them.
+// Set methods PUT DELETE PATCH etc to tell preflight requests whether method is allowed or not
+// setting optionsSuccessStatus 200, some legacy browsers (IE11, various SmartTVs) choke on 204
+// To allow multiple origins use array of origins inside cors options do import from process.env
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS : "*",
-    methods: process.env.ALLOWED_METHODS ? process.env.ALLOWED_METHODS : "*",
+    origin: process.env.ALLOWED_ORIGIN ? process.env.ALLOWED_ORIGIN : "*",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    optionsSuccessStatus: 200,
   })
 );
 
@@ -101,7 +109,7 @@ app.use(compression());
 // Adding server health check route
 app.use(serverHealthCheck);
 
-app.use("/v1", routes);
+// app.use("/v1", routes);
 
 // Hnadling unknown routes on this server
 app.use((req, res, next) => next(new ApiError(404, `Not found`)));
@@ -117,13 +125,15 @@ app.use(globalErrorHandler);
 const server = http.createServer(app);
 
 /**
- * Fetch secrets and inject them into the process environment if needed
+ * Fetch secrets and inject secrets into the process environment that need on the time
+ * of api call or required by other service
  * Establish database connection
  * Bind the port number to server intance to listen incomming requests
  */
 
 // Establishing connection to the database
-const DB_STRING = "";
+const DB_STRING =
+  "mongodb+srv://imkumawat:imkumawat@development.7oo63ay.mongodb.net/?retryWrites=true&w=majority";
 mongoose.set("strictQuery", false);
 mongoose
   .connect(DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true })
@@ -148,7 +158,7 @@ process.on("unhandledRejection", (err) => {
   // process.exit(0);
   // In this case always close server gracefully, give time to server to fulfill current processes and
   // then terminate the application and that's why this node event listner defined
-  // at the bottom or after the server running so that it can also handle the
+  // at the bottom or after the server running. It can also handle the
   // unhandledRejection in middlwares if not handled in the middleware
   // below code is the implementation for the same to close server gracefully
   server.close(() => {
