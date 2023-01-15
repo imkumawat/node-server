@@ -132,8 +132,7 @@ const server = http.createServer(app);
  */
 
 // Establishing connection to the database
-const DB_STRING =
-  "mongodb+srv://imkumawat:imkumawat@development.7oo63ay.mongodb.net/?retryWrites=true&w=majority";
+const DB_STRING = "";
 mongoose.set("strictQuery", false);
 mongoose
   .connect(DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true })
