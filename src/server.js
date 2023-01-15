@@ -175,23 +175,6 @@ secretsInjector()
     process.exit(0);
   });
 
-// Establishing connection to the database
-// const DB_STRING =
-//   "mongodb+srv://imkumawat:TRS3epLt3CNX5ZK5@development.7oo63ay.mongodb.net/?retryWrites=true&w=majority";
-// mongoose.set("strictQuery", false);
-// mongoose
-//   .connect(DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true })
-//   .then(() => {
-//     logger.info("Connected to database");
-
-//     // Fetching secrets and injecting them into process environment
-
-//     // Everything is ready, let's take server up
-//     server.listen(process.env.SERVER_PORT || 4000, () => {
-//       logger.info("Listening on port 4000");
-//     });
-//   });
-
 // Handling unhandled promise rejections in entire application
 // usually they occurs by bad network problem
 process.on("unhandledRejection", (err) => {
