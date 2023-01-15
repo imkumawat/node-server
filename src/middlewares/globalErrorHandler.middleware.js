@@ -1,3 +1,4 @@
+const config = require("config");
 const httpStatus = require("http-status");
 const Sentry = require("@sentry/node");
 const { ApiError } = require("../utils/ApiError");
@@ -56,7 +57,7 @@ exports.globalErrorHandler = (err, req, res, next) => {
     message = httpStatus[parseInt(statusCode, 10)];
   }
 
-  if (process.env.NODE_ENV === "development") {
+  if (config.NODE_ENV === "development") {
     logger.error(err);
   }
   // if env is development then we will send error stack
@@ -65,6 +66,6 @@ exports.globalErrorHandler = (err, req, res, next) => {
   res.status(statusCode).json({
     status: "fail",
     message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(config.NODE_ENV === "development" && { stack: err.stack }),
   });
 };

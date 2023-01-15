@@ -14,7 +14,7 @@ process.on("SIGQUIT", require("./utils/signalHandler"));
 process.on("uncaughtException", require("./utils/exitHandler"));
 
 // importing required npm packages
-require("dotenv").config();
+const config = require("config");
 const http = require("http");
 const express = require("express");
 const cors = require("cors");
@@ -55,10 +55,10 @@ const app = express();
 // Setting origin controls, allowed methods and prohibate requests from unknown origin
 // Set methods PUT DELETE PATCH etc to tell preflight requests whether method is allowed or not
 // setting optionsSuccessStatus 200, some legacy browsers (IE11, various SmartTVs) choke on 204
-// To allow multiple origins use array of origins inside cors options do import from process.env
+// To allow multiple origins use array of origins inside cors options do import from config
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGIN ? process.env.ALLOWED_ORIGIN : "*",
+    origin: config.ALLOWED_ORIGIN ? config.ALLOWED_ORIGIN : "*",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     optionsSuccessStatus: 200,
   })
@@ -70,7 +70,7 @@ app.use(unsuccessfulHttpLog);
 
 // Adding api rate limiter, use only for production environment
 // eslint-disable-next-line
-const _ = process.env.NODE_ENV === "production" ? app.use(rateLimiter) : null;
+const _ = config.NODE_ENV === "production" ? app.use(rateLimiter) : null;
 
 // Adding body parser to enable json body format & parsing
 // Set the body limit as per the possible request size in your app to avoid buffer overflow attack
@@ -144,12 +144,11 @@ secretsInjector()
     logger.info(Sentrystatus);
 
     // Establishing database connection
-    const DB_STRING = "";
     mongoose.set("strictQuery", false);
 
     return new Promise((resolve, reject) => {
       mongoose
-        .connect(DB_STRING, {
+        .connect(config.DB_CONNECTION_STRING, {
           useUnifiedTopology: true,
           useNewUrlParser: true,
         })
@@ -165,7 +164,7 @@ secretsInjector()
     logger.info(databaseStatus);
 
     // Everything is ready, let's take server up
-    server.listen(process.env.SERVER_PORT || 4000, () => {
+    server.listen(config.SERVER_PORT || 4000, () => {
       logger.info("Listening on port 4000");
     });
   })
