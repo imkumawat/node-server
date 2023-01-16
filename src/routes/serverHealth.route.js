@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const router = app.Router();
 
-exports.serverHealthCheck = router.get("/", (req, res) => {
+exports.serverHealthCheck = router.get("/", async (req, res) => {
   // Collecting system info
   const serverHealth = {
     server_status: "Active",
@@ -20,6 +20,5 @@ exports.serverHealthCheck = router.get("/", (req, res) => {
     res.status(200).send(serverHealth);
   } catch (err) {
     res.status(503).send(serverHealth);
-    // next(err);
   }
 });

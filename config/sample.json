@@ -2,9 +2,12 @@
   "NODE_ENV": "development",
   "SERVER_PORT": 4000,
   "ALLOWED_ORIGIN": "*",
+  "ALLOWED_METHODS": ["GET", "POST", "PUT", "PATCH", "DELETE"],
   "AWS_ACCESS_KEY_ID": "",
   "AWS_SECRET_ACCESS_KEY": "",
-  "REGION": "us-east-1",
+  "AWS_REGION": "us-east-1",
+  "REDIS_HOST": "127.0.0.1",
+  "REDIS_PORT": 6379,
   "SENTRY_DSN": "https://27ccc7f@94507440.ingest.sentry.io/450072064",
   "DB_CONNECTION_STRING": "mongodb://127.0.0.1:27017"
 }

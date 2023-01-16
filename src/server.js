@@ -44,7 +44,7 @@ const {
   sentryRequestHandler,
   sentryTracingHandler,
 } = require("./utils/sentry");
-
+const { redisClient } = require("./utils/redisClient");
 // Creating express app instance
 const app = express();
 
@@ -59,7 +59,7 @@ const app = express();
 app.use(
   cors({
     origin: config.ALLOWED_ORIGIN ? config.ALLOWED_ORIGIN : "*",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    methods: config.ALLOWED_METHODS ? config.ALLOWED_METHODS : "*",
     optionsSuccessStatus: 200,
   })
 );
@@ -143,6 +143,18 @@ secretsInjector()
   .then((Sentrystatus) => {
     logger.info(Sentrystatus);
 
+    return new Promise((resolve, reject) => {
+      redisClient()
+        .then((redisStatus) => {
+          resolve(redisStatus);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  })
+  .then((redisStatus) => {
+    logger.info(redisStatus);
     // Establishing database connection
     mongoose.set("strictQuery", false);
 
