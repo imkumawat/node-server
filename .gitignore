@@ -2,3 +2,6 @@ node_modules/
 logs/
 .eslintcache
 config/development.json
+src/controllers
+src/models
+src/routes/v1

@@ -7,7 +7,7 @@
 */
 const httpStatus = require("http-status");
 const { RateLimiterMemory } = require("rate-limiter-flexible");
-const { TOO_MANY_REQUESTS } = require("../constants/errorMessages");
+const { TOO_MANY_REQUESTS } = require("../constants/error-constants");
 const { logger } = require("../utils/logger");
 
 // Configuring rate limiting. Allow at most 1 request per IP address for every 60 sec.

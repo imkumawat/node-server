@@ -5,10 +5,11 @@ const {
 } = require("@aws-sdk/client-secrets-manager");
 
 const client = new SecretsManagerClient({
-  credentials: {
-    accessKeyId: config.AWS_ACCESS_KEY_ID,
-    secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
-  },
+  // This is for the informational only, We must use these credentials from default providers
+  // credentials: {
+  //   accessKeyId: config.AWS_ACCESS_KEY_ID,
+  //   secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
+  // },
   region: config.AWS_REGION ? config.AWS_REGION : "us-east-1",
 });
 

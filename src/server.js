@@ -1,7 +1,7 @@
 // Adding Event Signal listner to the application
-process.on("SIGINT", require("./utils/signalHandler"));
-process.on("SIGTERM", require("./utils/signalHandler"));
-process.on("SIGQUIT", require("./utils/signalHandler"));
+process.on("SIGINT", require("./utils/signal-handler"));
+process.on("SIGTERM", require("./utils/signal-handler"));
+process.on("SIGQUIT", require("./utils/signal-handler"));
 
 // Handling uncaught exceptions
 // if uncaught exception occurs than our entire node process will be in uncleaned state
@@ -11,7 +11,7 @@ process.on("SIGQUIT", require("./utils/signalHandler"));
 // Note: Express will not handle the all uncaught exceptions, thus they will be
 // handled by this uncaughtException handler like syntax error etc...
 // This must be defined before executing any application code or on the top
-process.on("uncaughtException", require("./utils/exitHandler"));
+process.on("uncaughtException", require("./utils/exit-handler"));
 
 // importing required npm packages
 const config = require("config");
@@ -29,22 +29,22 @@ const mongoose = require("mongoose");
 const {
   successfulHttpLog,
   unsuccessfulHttpLog,
-} = require("./middlewares/morgan.middleware");
+} = require("./middlewares/morgan-middleware");
 const { logger } = require("./utils/logger");
-const { rateLimiter } = require("./middlewares/rateLimiter.middleware");
+const { rateLimiter } = require("./middlewares/rate-limiter-middleware");
 const {
   globalErrorHandler,
-} = require("./middlewares/globalErrorHandler.middleware");
-const { serverHealthCheck } = require("./routes/serverHealth.route");
-const { ApiError } = require("./utils/ApiError");
-const { secretsInjector } = require("./utils/secretsInjector");
+} = require("./middlewares/error-handler-middleware");
+const { serverHealthCheck } = require("./routes/server-health-route");
+const { ApiError } = require("./utils/api-error");
+const { secretsInjector } = require("./utils/secrets-injector");
 // const routes = require("./routes/v1");
 const {
   sentryIntializer,
   sentryRequestHandler,
   sentryTracingHandler,
 } = require("./utils/sentry");
-const { redisClient } = require("./utils/redisClient");
+const { redisClient } = require("./utils/redis-client");
 // Creating express app instance
 const app = express();
 
@@ -98,12 +98,13 @@ app.use(compression());
  */
 
 // Adding server health check route
+// http://[instance-ip]/
 app.use(serverHealthCheck);
 
 // app.use("/v1", routes);
 
 // Hnadling unknown routes on this server
-app.use((req, res, next) => next(new ApiError(404, `Not found`)));
+app.use("*", (req, res, next) => next(new ApiError(404, `Not found`)));
 
 // Adding global error handler middleware, Must be after all routes and before server intialization
 app.use(globalErrorHandler);
