@@ -1,3 +1,4 @@
+const config = require("config");
 const winston = require("winston");
 // Define your severity levels.
 // With them, You can create log files,
@@ -38,7 +39,7 @@ const format = winston.format.combine(
   // Add the message timestamp with the preferred format
   winston.format.timestamp({ format: "DD-MM-YYYY HH:mm:ss:ms" }),
   // Tell Winston that the logs must be colored
-  winston.format.colorize({ all: process.env.NODE_ENV === "development" }),
+  winston.format.colorize({ all: config.NODE_ENV === "development" }),
   // Define the format of the message showing the timestamp, the level and the message
   winston.format.printf(
     (info) => `${info.timestamp} ${info.level}: ${info.message}`
@@ -64,7 +65,7 @@ const transports = [
 // Create the logger instance that has to be exported
 // and used to log messages.
 exports.logger = winston.createLogger({
-  level: process.env.NODE_ENV === "development" ? "debug" : "info",
+  level: config.NODE_ENV === "development" ? "debug" : "info",
   levels,
   format,
   transports,

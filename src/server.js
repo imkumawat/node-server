@@ -1,7 +1,15 @@
+// const Joi = require("joi");
+// const { configSchema } = require("./validators/config-validator");
+// const config = require("config");
+
+// const { error, data } = configSchema.validate(config);
+// console.log("Erros found:\n", error);
+// console.log("Data found:\n", data);
+
 // Adding Event Signal listner to the application
-process.on("SIGINT", require("./utils/signalHandler"));
-process.on("SIGTERM", require("./utils/signalHandler"));
-process.on("SIGQUIT", require("./utils/signalHandler"));
+process.on("SIGINT", require("./utils/signal-handler"));
+process.on("SIGTERM", require("./utils/signal-handler"));
+process.on("SIGQUIT", require("./utils/signal-handler"));
 
 // Handling uncaught exceptions
 // if uncaught exception occurs than our entire node process will be in uncleaned state
@@ -11,10 +19,10 @@ process.on("SIGQUIT", require("./utils/signalHandler"));
 // Note: Express will not handle the all uncaught exceptions, thus they will be
 // handled by this uncaughtException handler like syntax error etc...
 // This must be defined before executing any application code or on the top
-process.on("uncaughtException", require("./utils/exitHandler"));
+process.on("uncaughtException", require("./utils/exit-handler"));
 
 // importing required npm packages
-require("dotenv").config();
+const config = require("config");
 const http = require("http");
 const express = require("express");
 const cors = require("cors");
@@ -29,34 +37,25 @@ const mongoose = require("mongoose");
 const {
   successfulHttpLog,
   unsuccessfulHttpLog,
-} = require("./middlewares/morgan.middleware");
+} = require("./middlewares/morgan-middleware");
 const { logger } = require("./utils/logger");
-const { rateLimiter } = require("./middlewares/rateLimiter.middleware");
+const { rateLimiter } = require("./middlewares/rate-limiter-middleware");
 const {
   globalErrorHandler,
-} = require("./middlewares/globalErrorHandler.middleware");
-const { serverHealthCheck } = require("./routes/serverHealth.route");
-const { ApiError } = require("./utils/ApiError");
+} = require("./middlewares/error-handler-middleware");
+const { serverHealthCheck } = require("./routes/server-health-route");
+const { ApiError } = require("./utils/api-error");
+const { secretsInjector } = require("./utils/secrets-injector");
 // const routes = require("./routes/v1");
 const {
   sentryIntializer,
   sentryRequestHandler,
   sentryTracingHandler,
 } = require("./utils/sentry");
-
+const { redisClient } = require("./utils/redis-client");
 // Creating express app instance
 const app = express();
 
-// Initiazing sentry setup to monitor the server
-sentryIntializer(app)
-  .then((status) => {
-    logger.info(status);
-  })
-  .catch((err) => {
-    logger.error(err);
-  });
-app.use(sentryRequestHandler);
-app.use(sentryTracingHandler);
 /**
  * Integrating global middlwares
  */
@@ -64,11 +63,11 @@ app.use(sentryTracingHandler);
 // Setting origin controls, allowed methods and prohibate requests from unknown origin
 // Set methods PUT DELETE PATCH etc to tell preflight requests whether method is allowed or not
 // setting optionsSuccessStatus 200, some legacy browsers (IE11, various SmartTVs) choke on 204
-// To allow multiple origins use array of origins inside cors options do import from process.env
+// To allow multiple origins use array of origins inside cors options do import from config
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGIN ? process.env.ALLOWED_ORIGIN : "*",
-    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    origin: config.ALLOWED_ORIGIN ? config.ALLOWED_ORIGIN : "*",
+    methods: config.ALLOWED_METHODS ? config.ALLOWED_METHODS : "*",
     optionsSuccessStatus: 200,
   })
 );
@@ -79,7 +78,7 @@ app.use(unsuccessfulHttpLog);
 
 // Adding api rate limiter, use only for production environment
 // eslint-disable-next-line
-const _ = process.env.NODE_ENV === "production" ? app.use(rateLimiter) : null;
+const _ = config.NODE_ENV === "production" ? app.use(rateLimiter) : null;
 
 // Adding body parser to enable json body format & parsing
 // Set the body limit as per the possible request size in your app to avoid buffer overflow attack
@@ -107,12 +106,13 @@ app.use(compression());
  */
 
 // Adding server health check route
+// http://[instance-ip]/
 app.use(serverHealthCheck);
 
 // app.use("/v1", routes);
 
 // Hnadling unknown routes on this server
-app.use((req, res, next) => next(new ApiError(404, `Not found`)));
+app.use("*", (req, res, next) => next(new ApiError(404, `Not found`)));
 
 // Adding global error handler middleware, Must be after all routes and before server intialization
 app.use(globalErrorHandler);
@@ -126,29 +126,77 @@ const server = http.createServer(app);
 
 /**
  * Fetch secrets and inject secrets into the process environment that need on the time
- * of api call or required by other service
+ * of api call or required by other service like db connection sentry etc...
  * Establish database connection
  * Bind the port number to server intance to listen incomming requests
  */
 
-// Establishing connection to the database
-const DB_STRING = "";
-mongoose.set("strictQuery", false);
-mongoose
-  .connect(DB_STRING, { useUnifiedTopology: true, useNewUrlParser: true })
-  .then(() => {
-    logger.info("Connected to database");
+// Injecting secrets into the process
+secretsInjector()
+  .then((injectorStatus) => {
+    logger.info(injectorStatus);
 
-    // Fetching secrets and injecting them into process environment
+    return new Promise((resolve, reject) => {
+      // Initiazing sentry setup to monitor the server
+      sentryIntializer(app)
+        .then((sentryStatus) => {
+          app.use(sentryRequestHandler);
+          app.use(sentryTracingHandler);
+          resolve(sentryStatus);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  })
+  .then((sentryStatus) => {
+    logger.info(sentryStatus);
+
+    return new Promise((resolve, reject) => {
+      redisClient()
+        .then((redisStatus) => {
+          resolve(redisStatus);
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  })
+  .then((redisStatus) => {
+    logger.info(redisStatus);
+    // Establishing database connection
+    mongoose.set("strictQuery", false);
+
+    return new Promise((resolve, reject) => {
+      mongoose
+        .connect(config.DB_CONNECTION_STRING, {
+          useUnifiedTopology: true,
+          useNewUrlParser: true,
+        })
+        .then(() => {
+          resolve("Connected to database");
+        })
+        .catch((err) => {
+          reject(err);
+        });
+    });
+  })
+  .then((databaseStatus) => {
+    logger.info(databaseStatus);
 
     // Everything is ready, let's take server up
-    server.listen(process.env.SERVER_PORT || 4000, () => {
+    server.listen(config.SERVER_PORT || 4000, () => {
       logger.info("Listening on port 4000");
     });
+  })
+  .catch((err) => {
+    logger.error(err);
+    logger.info("Server closed due to unexpected error");
+    process.exit(0);
   });
 
 // Handling unhandled promise rejections in entire application
-// usually they occurs by bad network problem
+// usually they occurs by bad input or network problem
 process.on("unhandledRejection", (err) => {
   logger.error(err);
 

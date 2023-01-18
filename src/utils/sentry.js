@@ -1,3 +1,4 @@
+const config = require("config");
 const sentry = require("@sentry/node");
 const tracing = require("@sentry/tracing");
 
@@ -6,11 +7,16 @@ const tracing = require("@sentry/tracing");
 // Once application is production ready, we can delete sentry
 // for development environment
 
+/**
+ *
+ * @param {Express} expressInstance
+ * @returns Promise
+ */
 exports.sentryIntializer = (expressInstance) => {
   try {
     sentry.init({
-      environment: process.env.NODE_ENV,
-      dsn: process.env.SENTRY_DSN,
+      environment: config.NODE_ENV,
+      dsn: config.SENTRY_DSN,
       integrations: [
         new sentry.Integrations.Http({ tracing: true }),
         new tracing.Integrations.Express({ expressInstance }),

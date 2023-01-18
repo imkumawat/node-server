@@ -1,0 +1,20 @@
+FROM node:alpine
+
+#ENV PORT 3000
+#ENV NODE_ENV=locals
+
+# Create app directory
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app
+
+# Installing dependencies
+COPY package*.json /usr/src/app/
+RUN npm install
+
+# Copying source files
+COPY . /usr/src/app
+
+EXPOSE 4000
+
+# Running the app
+CMD "npm" "run" "start"

@@ -1,14 +1,18 @@
+const config = require("config");
 const {
   SecretsManagerClient,
   GetSecretValueCommand,
 } = require("@aws-sdk/client-secrets-manager");
 
 const client = new SecretsManagerClient({
-  credentials: {
-    accessKeyId: "",
-    secretAccessKey: "",
-  },
-  region: process.env.REGION ? process.env.REGION : "us-east-1",
+  // This is for the informational only, We must use these credentials from default providers
+  // credentials: {
+  //   accessKeyId: config.AWS_ACCESS_KEY_ID,
+  //   secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
+  // },
+  region: config.AWS_CONFIG.AWS_REGION
+    ? config.AWS_CONFIG.AWS_REGION
+    : "us-east-1",
 });
 
 exports.getSecret = async (secretName) => {

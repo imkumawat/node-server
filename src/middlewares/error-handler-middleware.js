@@ -1,12 +1,13 @@
+const config = require("config");
 const httpStatus = require("http-status");
 const Sentry = require("@sentry/node");
-const { ApiError } = require("../utils/ApiError");
+const { ApiError } = require("../utils/api-error");
 const { logger } = require("../utils/logger");
 const {
   MONGOOSE_CAST_ERROR,
   MONGOOSE_DUPLICATE_KEY_ERROR,
   MONGOOSE_VALIDATION_ERROR,
-} = require("../constants/errorMessages");
+} = require("../constants/error-constants");
 
 // Handling expected mongodb database errors
 // that actually occurs with bad input
@@ -56,7 +57,7 @@ exports.globalErrorHandler = (err, req, res, next) => {
     message = httpStatus[parseInt(statusCode, 10)];
   }
 
-  if (process.env.NODE_ENV === "development") {
+  if (config.NODE_ENV === "development") {
     logger.error(err);
   }
   // if env is development then we will send error stack
@@ -65,6 +66,6 @@ exports.globalErrorHandler = (err, req, res, next) => {
   res.status(statusCode).json({
     status: "fail",
     message,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
+    ...(config.NODE_ENV === "development" && { stack: err.stack }),
   });
 };
