@@ -10,7 +10,9 @@ const client = new SecretsManagerClient({
   //   accessKeyId: config.AWS_ACCESS_KEY_ID,
   //   secretAccessKey: config.AWS_SECRET_ACCESS_KEY,
   // },
-  region: config.AWS_REGION ? config.AWS_REGION : "us-east-1",
+  region: config.AWS_CONFIG.AWS_REGION
+    ? config.AWS_CONFIG.AWS_REGION
+    : "us-east-1",
 });
 
 exports.getSecret = async (secretName) => {

@@ -1,3 +1,11 @@
+// const Joi = require("joi");
+// const { configSchema } = require("./validators/config-validator");
+// const config = require("config");
+
+// const { error, data } = configSchema.validate(config);
+// console.log("Erros found:\n", error);
+// console.log("Data found:\n", data);
+
 // Adding Event Signal listner to the application
 process.on("SIGINT", require("./utils/signal-handler"));
 process.on("SIGTERM", require("./utils/signal-handler"));
@@ -125,24 +133,24 @@ const server = http.createServer(app);
 
 // Injecting secrets into the process
 secretsInjector()
-  .then((Injectorstatus) => {
-    logger.info(Injectorstatus);
+  .then((injectorStatus) => {
+    logger.info(injectorStatus);
 
     return new Promise((resolve, reject) => {
       // Initiazing sentry setup to monitor the server
       sentryIntializer(app)
-        .then((Sentrystatus) => {
+        .then((sentryStatus) => {
           app.use(sentryRequestHandler);
           app.use(sentryTracingHandler);
-          resolve(Sentrystatus);
+          resolve(sentryStatus);
         })
         .catch((err) => {
           reject(err);
         });
     });
   })
-  .then((Sentrystatus) => {
-    logger.info(Sentrystatus);
+  .then((sentryStatus) => {
+    logger.info(sentryStatus);
 
     return new Promise((resolve, reject) => {
       redisClient()
@@ -188,7 +196,7 @@ secretsInjector()
   });
 
 // Handling unhandled promise rejections in entire application
-// usually they occurs by bad network problem
+// usually they occurs by bad input or network problem
 process.on("unhandledRejection", (err) => {
   logger.error(err);
 
