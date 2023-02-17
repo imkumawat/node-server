@@ -1,4 +1,4 @@
-exports.ApiError = class ApiError extends Error {
+module.exports = class ApiError extends Error {
   constructor(statusCode, message) {
     // constructor(statusCode, message, isOperational = true) {
     super(message);

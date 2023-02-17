@@ -32,20 +32,21 @@ const hpp = require("hpp");
 const mongoSanitize = require("express-mongo-sanitize");
 const compression = require("compression");
 const mongoose = require("mongoose");
+const passport = require("passport");
 
 // importing custom packages and middlewares
 const {
   successfulHttpLog,
   unsuccessfulHttpLog,
 } = require("./middlewares/morgan-middleware");
-const { logger } = require("./utils/logger");
+const logger = require("./utils/logger");
 const { rateLimiter } = require("./middlewares/rate-limiter-middleware");
 const {
   globalErrorHandler,
 } = require("./middlewares/error-handler-middleware");
 const { serverHealthCheck } = require("./routes/server-health-route");
 const { ApiError } = require("./utils/api-error");
-const { secretsInjector } = require("./utils/secrets-injector");
+const secretsInjector = require("./utils/secrets-injector");
 // const routes = require("./routes/v1");
 const {
   sentryIntializer,
@@ -53,6 +54,7 @@ const {
   sentryTracingHandler,
 } = require("./utils/sentry");
 const { redisClient } = require("./utils/redis-client");
+const jwtStrategy = require("./passport/jwt-passport");
 // Creating express app instance
 const app = express();
 
@@ -66,8 +68,8 @@ const app = express();
 // To allow multiple origins use array of origins inside cors options do import from config
 app.use(
   cors({
-    origin: config.ALLOWED_ORIGIN ? config.ALLOWED_ORIGIN : "*",
-    methods: config.ALLOWED_METHODS ? config.ALLOWED_METHODS : "*",
+    origin: config.CORS.ALLOWED_ORIGIN ? config.CORS.ALLOWED_ORIGIN : "*",
+    methods: config.CORS.ALLOWED_METHODS ? config.CORS.ALLOWED_METHODS : "*",
     optionsSuccessStatus: 200,
   })
 );
@@ -101,8 +103,11 @@ app.use(mongoSanitize());
 // compress request responses
 app.use(compression());
 
+// Setting passport strategy
+passport.use(jwtStrategy);
+
 /**
- * Defininig routes
+ **************Defininig Routes**************
  */
 
 // Adding server health check route
@@ -169,7 +174,7 @@ secretsInjector()
 
     return new Promise((resolve, reject) => {
       mongoose
-        .connect(config.DB_CONNECTION_STRING, {
+        .connect(config.DATABASE.CONNECTION_STRING, {
           useUnifiedTopology: true,
           useNewUrlParser: true,
         })
@@ -185,7 +190,7 @@ secretsInjector()
     logger.info(databaseStatus);
 
     // Everything is ready, let's take server up
-    server.listen(config.SERVER_PORT || 4000, () => {
+    server.listen(config.SERVER.PORT || 4000, () => {
       logger.info("Listening on port 4000");
     });
   })
@@ -200,6 +205,7 @@ secretsInjector()
 process.on("unhandledRejection", (err) => {
   logger.error(err);
 
+  // use sentry to capture this error
   // do not use process.exit(0) directly, this will abort all the running processes
   // and terminate the application
   // process.exit(0);

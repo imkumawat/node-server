@@ -7,8 +7,8 @@ exports.redisClient = async () => {
   try {
     redis = createClient({
       socket: {
-        host: config.REDIS_CONFIG.REDIS_HOST,
-        port: config.REDIS_CONFIG.REDIS_PORT,
+        host: config.REDIS.HOST,
+        port: config.REDIS.PORT,
       },
     });
     await redis.connect();
@@ -23,10 +23,10 @@ exports.redisClient = async () => {
  *
  * @param {string} key
  * @param {number} expr
- * @param {any} value
- * @returns {string} status
+ * @param {string | number} value
+ * @returns {Promise}
  */
-exports.setEx = async (key, expr, value) => {
+exports.setEx = (key, expr, value) => {
   try {
     return redis.setEx(key, expr, value);
   } catch (error) {
@@ -37,9 +37,23 @@ exports.setEx = async (key, expr, value) => {
 /**
  *
  * @param {string} key
- * @returns {string} value
+ * @param {string | number} value
+ * @returns {Promise}
  */
-exports.get = async (key) => {
+exports.set = (key, value) => {
+  try {
+    return redis.set(key, value);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+/**
+ *
+ * @param {string} key
+ * @returns {Promise}
+ */
+exports.getKey = (key) => {
   try {
     return redis.get(key);
   } catch (error) {
@@ -50,11 +64,69 @@ exports.get = async (key) => {
 /**
  *
  * @param {string} key
- * @returns {string} status
+ * @returns {Promise}
  */
-exports.delete = async (key) => {
+exports.deleteKey = (key) => {
   try {
     return redis.DEL(key);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+/**
+ *
+ * @param {string} listName
+ * @param {string | number} value
+ * @returns {Promise}
+ */
+exports.pushIntoList = (listName, value) => {
+  try {
+    return redis.LPUSH(listName, value);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+/**
+ *
+ * @param {string} listName
+ * @param {string | number} value
+ * @param {number} occurance
+ * @returns {Promise}
+ */
+exports.removeFromList = (listName, value, occurance = 1) => {
+  try {
+    return redis.LREM(listName, occurance, value);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+/**
+ *
+ * @param {string} listName
+ * @param {number} startFrom
+ * @param {number} endAt
+ * @returns {Promise}
+ */
+exports.getList = (listName, startFrom = 0, endAt = -1) => {
+  try {
+    return redis.LRANGE(listName, startFrom, endAt);
+  } catch (error) {
+    throw new Error(error.message);
+  }
+};
+
+/**
+ *
+ * @param {string} listName
+ * @param {number} expirationTimeInSeconds
+ * @returns {Promise}
+ */
+exports.setExpirationOnKey = (listName, expirationTimeInSeconds) => {
+  try {
+    return redis.expire(listName, expirationTimeInSeconds);
   } catch (error) {
     throw new Error(error.message);
   }

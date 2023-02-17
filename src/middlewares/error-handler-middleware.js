@@ -1,8 +1,8 @@
 const config = require("config");
 const httpStatus = require("http-status");
 const Sentry = require("@sentry/node");
-const { ApiError } = require("../utils/api-error");
-const { logger } = require("../utils/logger");
+const ApiError = require("../utils/api-error");
+const logger = require("../utils/logger");
 const {
   MONGOOSE_CAST_ERROR,
   MONGOOSE_DUPLICATE_KEY_ERROR,

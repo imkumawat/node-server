@@ -1,6 +1,6 @@
 const config = require("config");
 const morgan = require("morgan");
-const { logger } = require("../utils/logger");
+const logger = require("../utils/logger");
 
 // Finalizing the request source ip address
 const getIpFormat = () =>

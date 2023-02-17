@@ -16,7 +16,7 @@ exports.sentryIntializer = (expressInstance) => {
   try {
     sentry.init({
       environment: config.NODE_ENV,
-      dsn: config.SENTRY_DSN,
+      dsn: config.SENTRY.DSN,
       integrations: [
         new sentry.Integrations.Http({ tracing: true }),
         new tracing.Integrations.Express({ expressInstance }),

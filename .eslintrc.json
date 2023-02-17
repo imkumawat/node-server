@@ -16,6 +16,8 @@
     "no-await-in-loop": 2,
     "no-return-await": 2,
     "import/no-extraneous-dependencies": 0,
-    "camelcase": 2
+    "camelcase": 2,
+    "no-param-reassign": 0,
+    "security/detect-object-injection": 0
   }
 }

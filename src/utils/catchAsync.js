@@ -6,9 +6,9 @@
 
 /**
  *
- * @desc Handling async function
+ * Handling async function
  * @param {async function} fn
  */
-exports.asyncHandler = (fn) => (req, res, next) => {
-  Promise.resolve(fn(req, res, next)).catch(next);
+module.exports = (fn) => (req, res, next) => {
+  Promise.resolve(fn(req, res)).catch(next);
 };

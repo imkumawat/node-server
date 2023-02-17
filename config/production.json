@@ -1,0 +1,61 @@
+{
+  "NODE_ENV": "production",
+  "SERVER": {
+    "PORT": 4000,
+    "HOST": "http://127.0.0.1:4000"
+  },
+
+  "CORS": {
+    "ALLOWED_ORIGIN": "*",
+    "ALLOWED_METHODS": ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    "PRE_FLIGHT_REQUESTS_STATUS": 200
+  },
+
+  "CRYPTO": {
+    "SECRET_NAME": "dev/crypto-secrets",
+    "ALGORITHM": "aes-256-cbc",
+    "INIT_VECTOR": "abcdefghijklmnopqrstuvwxyz123456",
+    "SECURITY_KEY": "abcdefghijklmnopqrstuvwxyz123456abcdefghijklmnopqrstuvwxyz123456"
+  },
+
+  "AWS": {
+    "ACCESS_KEY_ID": "",
+    "SECRET_ACCESS_KEY": "",
+    "REGION": "us-east-1"
+  },
+
+  "REDIS": {
+    "SECRET_NAME": "dev/redis",
+    "HOST": "127.0.0.1",
+    "PORT": 6379
+  },
+
+  "SENTRY": {
+    "SECRET_NAME": "dev/sentry",
+    "DSN": ""
+  },
+
+  "DATABASE": {
+    "SECRET_NAME": "dev/mongo",
+    "CONNECTION_STRING": "mongodb://127.0.0.1:27017/node_server"
+  },
+
+  "JWT": {
+    "SECRET_NAME": "dev/jwt-private-key",
+    "PUBLIC_KEY": "-----BEGIN PUBLIC KEY-----MIIBITANBgkqhkiG9w0BAQEFAAOCAQ4AMIIBCQKCAQBGZtR8o7zqEUxkD1ridu3Z\nFEAo/OmzGoegQMz5WCKmWS2nUNM8o3H3Hw1QG7oizP54WxrNWms4cZnQeNIFNwKb\nMXuuhJRsZ6KcQ4xUqpAQVCenZQ9fF0OApYemj6aOFTosnqksmI0lfjGjDQihc49G\nUIqZ19bxnxt+7ri31n+csOUPknM+veLLcRJucwUEeEqG8PjgfNbYQObgz7bJ4Xck\n9K0f2bCRwRbJtezvofN9PRP0imdrKw6mQuOZ2SKzr7m4Kz8batxQ6ITSrA4bbo0e\nYut7Xoi7yMnPhPbmuNXjdmDLOZU/jW7ewaKAocSpl66WcEnk3uIPInBTBlRguvqX\nAgMBAAE=\n-----END PUBLIC KEY-----",
+    "PRIVATE_KEY": "-----BEGIN RSA PRIVATE KEY-----\nMIIEogIBAAKCAQBGZtR8o7zqEUxkD1ridu3ZFEAo/OmzGoegQMz5WCKmWS2nUNM8\no3H3Hw1QG7oizP54WxrNWms4cZnQeNIFNwKbMXuuhJRsZ6KcQ4xUqpAQVCenZQ9f\nF0OApYemj6aOFTosnqksmI0lfjGjDQihc49GUIqZ19bxnxt+7ri31n+csOUPknM+\nveLLcRJucwUEeEqG8PjgfNbYQObgz7bJ4Xck9K0f2bCRwRbJtezvofN9PRP0imdr\nKw6mQuOZ2SKzr7m4Kz8batxQ6ITSrA4bbo0eYut7Xoi7yMnPhPbmuNXjdmDLOZU/\njW7ewaKAocSpl66WcEnk3uIPInBTBlRguvqXAgMBAAECggEAMBQBgK0BUohFtv+V\nfZrii6D8wAEYSCwR+yrF0HKUFy5Hsz/LQloMdktKeC63SxTbo63z+9GH76AE/w3D\nv7P1n66HXINGKVINBtJKf3eLstsFyZeGi9YDT1O788+eWuG8PMSNm9sCaVxo4YUB\nI+EbM1XFkZKJQ7D4whKdK07dD1A3e/MX8N6HS8WMVszPcbHaEhuqMqkA2a+DP/K8\nS1r9zgf4kCzlzcfZBa0BZSok9tgZGK/eiML+rB56vCCAzzzhV2Cq4dJXa5vS9NLl\nk+XwdHceBPU2y+YKpKe54W8rMaF3Fcpc9P9ZoGDsRPKplvPwIhCukneMSHkj6huL\nRJcjYQKBgQCIPB4bobs1GIpGbDoX7qhX5jaiQ62DEJ+7km3f+Vgwv48SHALgPMHR\n/7Noan3mnDjMCzLGZ4z7cu7YfEp+WQRvrmRdL4L1V83wxTIsjJ4AjVMhgsV6zuZs\n934b7rF9kwcmH3iulN8TU7QyUjq8sNrzq47FW126bsFvIH8CRy3bfQKBgQCEStky\nOm5TfoZ5HSUlMc89Zg38BNM+ExWe/RReC0W0cPDhvCv7uCXfm1LmKGmRvDhgzM5P\nWmn7OkzMETThQt1Ys9o5ybGf67NgaN6bNb9ABUUJ2bzW6pdq2oetCveN8H8agaWR\nK1TWaIM4AEiEoibrbwdnGI8BDSP1q5xQ+lpCowKBgQCAehl2u45eI1d71GLw4Ow3\ngO7zFdoTaWEKNqyR9Yc66dxWGr6HlCTBE2CxTwSOr7NMkh7/RvaIx7oBxS1HfFGX\ntSIHU2AwWe7oaj/IDZCQOrc0OixchbR+/OQcGX2fTEIIrNNV6SV7B4w/jJbCDhNe\niuLosiJxSDP5xe6hSlkvzQKBgFSIU1MSHS9C+QBpDDRBKLCOBr+UAbt3jGhERQB2\n6XqMdI95ow08tQ61/HnPNu4FvGy2UdpI5tG+hhYbpJOQG0oz2mz0oYiTntIrEJtS\n87sf4uaReGZIDqsbqnh7OoY7N6yjTT1+174NmFNvcuc1ifMExlEtUyuTzveLSd5A\nqu5LAoGAUbJLaqdIOV08jwsO3ZgRgZCovGKrUEsNLQVFbCC4jrpy6Siha12JCU/J\nSHQHw49PComI/5C0kpoBxnUGCZZQoyC1TsfNJNe+3omW+MB2avDXFrVwBT5v5tPV\neU/MvLhOiMeG4glKHnxBqkP6NLqnsTL4fWBgwKIxZ2PFhEn7n0Y=\n-----END RSA PRIVATE KEY-----",
+    "ROLES": ["USER", "ADMIN"],
+    "VALID_TOKENS": [
+      "ACCESS_TOKEN",
+      "REFRESH_TOKEN",
+      "EMAIL_VERIFICATION_TOKEN",
+      "PASSWORD_RESET_TOKEN"
+    ],
+    "EXPIRES_IN": {
+      "ACCESS_TOKEN": 900,
+      "REFRESH_TOKEN": 1800,
+      "EMAIL_VERIFICATION_TOKEN": 900,
+      "PASSWORD_RESET_TOKEN": 900
+    }
+  }
+}

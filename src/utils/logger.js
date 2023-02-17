@@ -64,7 +64,7 @@ const transports = [
 
 // Create the logger instance that has to be exported
 // and used to log messages.
-exports.logger = winston.createLogger({
+module.exports = winston.createLogger({
   level: config.NODE_ENV === "development" ? "debug" : "info",
   levels,
   format,
